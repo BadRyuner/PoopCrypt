@@ -9,19 +9,25 @@ internal class Program
     static void Main(string[] args) // just example
     {
         var crypter = new Crypter();
+        var timer = new System.Diagnostics.Stopwatch();
 
         if (args.Length > 0)
-        {
+        {   
+            timer.Start();
+            var result = crypter.Decrypt<MyData>(System.IO.File.ReadAllBytes(args[0])); 
+            timer.Stop();
             WriteLine("Decrypted:");
             WriteLine("-----------------------------------------------");
-            WriteLine($"{crypter.Decrypt<MyData>(System.IO.File.ReadAllBytes(args[0]))}");
-            WriteLine("-----------------------------------------------");
+            WriteLine(result);
+            WriteLine($"-----------------------------------------------\nDone in {timer.ElapsedMilliseconds}ms!");
             ReadLine();
             return;
         }
 
         var data = new MyData() { Date = System.DateTime.Now, SomeString = System.IO.File.ReadAllText("input.txt") };
-        var encrypted = crypter.Encrypt(data);
+        timer.Start();
+        var encrypted = crypter.Encrypt(data); 
+        timer.Stop();
 
 #if AlsoDecrypt
         var decrypted = crypter.Decrypt<MyData>(encrypted.ToArray());
@@ -34,7 +40,7 @@ internal class Program
         WriteLine("------------------------------------------");
 #else
         System.IO.File.WriteAllBytes($"output.txt", encrypted.ToArray()); // 1:44
-        WriteLine("Done!");
+        WriteLine($"Done in {timer.ElapsedMilliseconds}ms!");
 #endif
         ReadLine();
     }

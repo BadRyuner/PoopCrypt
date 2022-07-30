@@ -56,8 +56,9 @@ namespace PoopCrypt
             ByteCrypters = new Dictionary<byte, IByteCrypter>();
             ByteCrypters.Add(0, new ByteCrypters.Pattern());
             ByteCrypters.Add(1, new ByteCrypters.StairXor());
-            ByteCrypters.Add(2, new ByteCrypters.ScatteredBytes());
-            ByteCrypters.Add(3, new ByteCrypters.SimpleXor());
+            ByteCrypters.Add(2, new ByteCrypters.PseudoAdd());
+            ByteCrypters.Add(3, new ByteCrypters.ScatteredBytes());
+            ByteCrypters.Add(4, new ByteCrypters.SimpleXor());
         }
 
         public void GenerateAutoTypeCrypterFor<T>(bool ignoreAttribute = false) where T : new() => TypeCrypters.Add(typeof(T), new Recusrive<T>() { local = this, ignore = ignoreAttribute });

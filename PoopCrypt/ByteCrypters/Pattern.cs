@@ -6,7 +6,7 @@ namespace PoopCrypt.ByteCrypters
 {
     public class Pattern : IByteCrypter
     {
-        public static Dictionary<byte, Func<bool, byte[], byte[]>> Patterns = new Dictionary<byte, Func<bool, byte[], byte[]>>();
+        public static Dictionary<byte, Func<bool, byte[], IEnumerable<byte>>> Patterns = new Dictionary<byte, Func<bool, byte[], IEnumerable<byte>>>();
 
         public Random rand = new Random();
 
@@ -14,6 +14,7 @@ namespace PoopCrypt.ByteCrypters
         {
             Patterns.Add(0, BasicPatterns.ArrayPlusArray);
             Patterns.Add(1, BasicPatterns.FakeBytes);
+            Patterns.Add(2, BasicPatterns.PlusMinus);
         }
 
         public IEnumerable<byte> CryptBytes(byte[] bytes)
@@ -22,10 +23,10 @@ namespace PoopCrypt.ByteCrypters
                 Console.Write("ByteCrypter.Pattern -> ");
 
             byte patternType = Patterns.Keys.ToArray()[rand.Next(0, Patterns.Count)];
-            byte[] newBytes = Patterns[patternType](false, bytes);
+            IEnumerable<byte> newBytes = Patterns[patternType](false, bytes);
             if (newBytes == null)
                 return CryptBytes(bytes);
-            List<byte> ret = new List<byte>(newBytes.Length + 1);
+            List<byte> ret = new List<byte>(((System.Collections.IList)newBytes).Count + 1);
             ret.Add(patternType);
             ret.AddRange(newBytes);
             return ret;
@@ -34,11 +35,11 @@ namespace PoopCrypt.ByteCrypters
         public IEnumerable<byte> DecryptBytes(byte[] bytes) => Patterns[bytes[0]](true, bytes.Skip(1).ToArray());
     }
 
-    public static class BasicPatterns
+    public unsafe static class BasicPatterns
     {
         public static Random rand = new Random();
 
-        public static byte[] ArrayPlusArray(bool decrypt, byte[] bytes)
+        public static IEnumerable<byte> ArrayPlusArray(bool decrypt, byte[] bytes)
         {
             if (decrypt)
             {
@@ -62,11 +63,11 @@ namespace PoopCrypt.ByteCrypters
                 for (int i = 0; i < bytes.Length; i++)
                     bytes[i] += toSum[i];
                 ret.AddRange(bytes);
-                return ret.ToArray();
+                return ret;
             }
         }
 
-        public static byte[] FakeBytes(bool decrypt, byte[] bytes)
+        public static IEnumerable<byte> FakeBytes(bool decrypt, byte[] bytes)
         {
             if (decrypt)
             {
@@ -90,7 +91,7 @@ namespace PoopCrypt.ByteCrypters
                         ret.Add((byte)~next);
                     }
                 }
-                return ret.ToArray();
+                return ret;
             }
             else
             {
@@ -136,8 +137,70 @@ namespace PoopCrypt.ByteCrypters
                     ret.Add(bytes[pos]);
                     pos++;
                 }
-                return ret.ToArray();
+                return ret;
             }
+        }
+
+        public static IEnumerable<byte> PlusMinus(bool decrypt, byte[] bytes)
+        {
+            List<byte> ret = new List<byte>();
+            int length;
+            bool isEven;
+            byte[] half1; byte[] half2;
+
+            if (decrypt)
+            {
+                isEven = bytes[0] == 1;
+                length = bytes.Skip(1).Take(4).ToArray().IntFromBytes();
+                half1 = bytes.Skip(5).Take(length).ToArray();
+                half2 = bytes.Skip(5 + length).ToArray();
+
+                for (int i = 0; i < half1.Length; i++)
+                {
+                    half2[i] += half1[i];
+                    half1[i] -= half2[i];
+                }
+
+                ret.AddRange(half1);
+                ret.AddRange(half2);
+
+                if (!isEven)
+                    ret.RemoveAt(ret.Count - 1);
+
+                return ret;
+            }
+
+            if (Crypter.VERBOSE)
+                Console.WriteLine("PlusMinus");
+
+            isEven = bytes.Length % 2 == 0;
+            if (isEven)
+            {
+                length = bytes.Length / 2;
+                half1 = bytes.Take(length).ToArray();
+                half2 = bytes.Skip(length).ToArray();
+            }
+            else
+            {
+                length = (bytes.Length + 1) / 2;
+                half1 = bytes.Take(length).ToArray();
+                var a = bytes.Skip(length).ToList();
+                a.Add(0);
+                half2 = a.ToArray();
+            }
+
+            for(int i = 0; i < half1.Length; i++)
+            {
+                half1[i] += half2[i];
+                half2[i] -= half1[i];
+            }
+
+            ret.Add(isEven ? (byte)1 : (byte)0);
+            ret.AddRange(length.ToBytes());
+            ret.AddRange(half1);
+            ret.AddRange(half2);
+
+            return ret;
         }
     }
 }
