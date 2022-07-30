@@ -16,7 +16,7 @@ namespace PoopCrypt.ByteCrypters
             Patterns.Add(1, BasicPatterns.FakeBytes);
         }
 
-        public byte[] CryptBytes(byte[] bytes)
+        public IEnumerable<byte> CryptBytes(byte[] bytes)
         {
             if (Crypter.VERBOSE)
                 Console.Write("ByteCrypter.Pattern -> ");
@@ -28,10 +28,10 @@ namespace PoopCrypt.ByteCrypters
             List<byte> ret = new List<byte>(newBytes.Length + 1);
             ret.Add(patternType);
             ret.AddRange(newBytes);
-            return ret.ToArray();
+            return ret;
         }
 
-        public byte[] DecryptBytes(byte[] bytes) => Patterns[bytes[0]](true, bytes.Skip(1).ToArray());
+        public IEnumerable<byte> DecryptBytes(byte[] bytes) => Patterns[bytes[0]](true, bytes.Skip(1).ToArray());
     }
 
     public static class BasicPatterns

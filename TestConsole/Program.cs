@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿//#define AlsoDecrypt
+
+using System.Linq;
 using static System.Console;
 using PoopCrypt;
 
@@ -18,11 +20,11 @@ internal class Program
             return;
         }
 
-        var data = new MyData() { SomeString = System.IO.File.ReadAllText("input.txt") };
+        var data = new MyData() { Date = System.DateTime.Now, SomeString = System.IO.File.ReadAllText("input.txt") };
         var encrypted = crypter.Encrypt(data);
-        var decrypted = crypter.Decrypt<MyData>(encrypted);
 
-        System.IO.File.WriteAllBytes($"output.txt", encrypted);
+#if AlsoDecrypt
+        var decrypted = crypter.Decrypt<MyData>(encrypted.ToArray());
 
         WriteLine("-------Encrypted and Decrypted!-----------");
         //Write("- As Chars: ");
@@ -30,13 +32,18 @@ internal class Program
         //    Write($"{(char)b} ");
         WriteLine($"Decrypted:\n{decrypted}");
         WriteLine("------------------------------------------");
+#else
+        System.IO.File.WriteAllBytes($"output.txt", encrypted.ToArray()); // 1:44
+        WriteLine("Done!");
+#endif
         ReadLine();
     }
 
     public struct MyData
     {
+        [EncryptMe] public System.DateTime Date;
         [EncryptMe] public string SomeString;
-        public override string ToString() => $"SomeString: {SomeString}";
+        public override string ToString() => $"Date: {Date}\nSomeString: {SomeString}";
         //public override string ToString() => SomeString;
     }
 

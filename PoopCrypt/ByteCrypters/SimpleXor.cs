@@ -9,7 +9,7 @@ namespace PoopCrypt.ByteCrypters
         public Random rand = new Random();
         public byte[] randByte = new byte[] { 54 };
 
-        public byte[] CryptBytes(byte[] bytes)
+        public IEnumerable<byte> CryptBytes(byte[] bytes)
         {
             if (Crypter.VERBOSE)
                 Console.WriteLine("ByteCrypter.SimpleXor");
@@ -23,10 +23,10 @@ namespace PoopCrypt.ByteCrypters
             for (int i = 0; i < bytes.Length; i++)
                 newBytes.Add((byte)(bytes[i] ^ xor));
 
-            return newBytes.ToArray();
+            return newBytes;
         }
 
-        public byte[] DecryptBytes(byte[] bytes)
+        public IEnumerable<byte> DecryptBytes(byte[] bytes)
         {
             byte xor = bytes[0];
 
@@ -35,7 +35,7 @@ namespace PoopCrypt.ByteCrypters
             for (int i = 1; i < bytes.Length; i++)
                 newBytes.Add((byte)(bytes[i] ^ xor));
 
-            return newBytes.ToArray();
+            return newBytes;
         }
     }
 }

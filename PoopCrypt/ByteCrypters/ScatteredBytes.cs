@@ -8,7 +8,7 @@ namespace PoopCrypt.ByteCrypters
     {
         Random rand = new Random();
 
-        public byte[] CryptBytes(byte[] bytes)
+        public IEnumerable<byte> CryptBytes(byte[] bytes)
         {
             if (Crypter.VERBOSE)
                 Console.WriteLine("ByteCrypter.ScatteredBytes");
@@ -26,10 +26,10 @@ namespace PoopCrypt.ByteCrypters
                 toParse.Remove(next);
             }
 
-            return newBytes.ToArray();
+            return newBytes;
         }
 
-        public byte[] DecryptBytes(byte[] bytes)
+        public IEnumerable<byte> DecryptBytes(byte[] bytes)
         {
             var parsed = new Dictionary<ushort, byte>();
             for (int i = 0; i < bytes.Length; i += 3)
@@ -41,7 +41,7 @@ namespace PoopCrypt.ByteCrypters
             foreach (var i in sorted)
                 newBytes.Add(i.Value);
 
-            return newBytes.ToArray();
+            return newBytes;
         }
     }
 }

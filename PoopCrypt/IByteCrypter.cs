@@ -6,7 +6,7 @@ namespace PoopCrypt
 {
     public interface IByteCrypter
     {
-        byte[] CryptBytes(byte[] bytes);
-        byte[] DecryptBytes(byte[] bytes);
+        IEnumerable<byte> CryptBytes(byte[] bytes);
+        IEnumerable<byte> DecryptBytes(byte[] bytes);
     }
 }
