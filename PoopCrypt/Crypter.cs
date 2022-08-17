@@ -8,6 +8,9 @@ namespace PoopCrypt
 {
     public unsafe class Crypter
     {
+        public static Crypter Shared { get => _shared == null ? _shared = new Crypter() : _shared; set => _shared = value; }
+        private static Crypter _shared;
+
         public static bool VERBOSE =
 #if DEBUG
             true;
@@ -20,8 +23,11 @@ namespace PoopCrypt
         public Dictionary<Type, ITypeCrypter> TypeCrypters;
         public Dictionary<byte, IByteCrypter> ByteCrypters;
 
+        private byte[] cachedTypeCryptersKeys;
+
         public Crypter()
         {
+            _shared = this;
             RegisterDefaultTypeCrypters();
             RegisterDefaultByteCrypters();
         }
@@ -92,7 +98,9 @@ namespace PoopCrypt
                 else bytes.AddRange(TypeCrypters[fType].Encrypt(value));
             }
 
-            int parsedBytes = 0;
+			cachedTypeCryptersKeys = ByteCrypters.Keys.ToArray();
+
+			int parsedBytes = 0;
             var bytesAsArr = bytes.ToArray();
             List<byte> encryptedBytes = new List<byte>(bytes.Count);
             while (parsedBytes != bytes.Count)
@@ -175,8 +183,9 @@ namespace PoopCrypt
 
         private (byte b, IByteCrypter crypter) GetRandomCrypter()
         {
-            var values = ByteCrypters.Keys.ToArray();
-            var selected = rand.Next(0, values.Length - 1);
+			//var values = ByteCrypters.Keys.ToArray();
+			var values = cachedTypeCryptersKeys;
+			var selected = rand.Next(0, values.Length - 1);
             return (values[selected], ByteCrypters[values[selected]]);
         }
     }

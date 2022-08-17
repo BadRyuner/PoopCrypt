@@ -7,37 +7,89 @@ namespace PoopCrypt.TypeCrypters
 {
     public class StringCrypter : ITypeCrypter
     {
-        public object Decrypt(byte[] data, ref int jump)
+        public static StringCrypterMode Mode = StringCrypterMode.Auto;
+
+        public unsafe object Decrypt(byte[] data, ref int jump)
         {
-            StringBuilder sb = new StringBuilder();
+			//StringBuilder sb = new StringBuilder();
 
-            int length = data.Skip(jump).Take(4).ToArray().IntFromBytes(); jump += 4;
-            var kek = length.ToBytes();
+			//int length = data.Skip(jump).Take(4).ToArray().IntFromBytes(); jump += 4;
+			int length = default;
+			fixed (byte* p = &data[jump])
+				length = *(int*)p;
 
-            if (length == 0)
+			jump += 4;
+
+			if (length == 0)
                 return null;
 
-            while (length > 0)
+            StringCrypterMode read = (StringCrypterMode)data.Skip(jump).Take(1).First(); jump += 1;
+            byte[] bytes = data.Skip(jump).Take(length).ToArray(); jump += length;
+
+            switch(read)
             {
-                sb.Append(new byte[] { data[jump], data[jump + 1] }.CharFromBytes());
-                jump += 2; length -= 1;
-            }
+                case StringCrypterMode.ASCII:
+                    return Encoding.ASCII.GetString(bytes);
+                case StringCrypterMode.Utf8:
+                    return Encoding.UTF8.GetString(bytes);
+                case StringCrypterMode.Unicode:
+					return Encoding.Unicode.GetString(bytes);
+				case StringCrypterMode.Utf32:
+					return Encoding.UTF32.GetString(bytes);
+			}
+            return null;
+			//return sb.ToString();
+		}
 
-            return sb.ToString();
-        }
-
-        public byte[] Encrypt(object target)
+        public unsafe byte[] Encrypt(object target) // 443
         {
             var encryptTarget = (string)target;
             if (encryptTarget == null)
                 return new byte[] { 0, 0, 0, 0 };
 
-            List<byte> buffer = new List<byte>(16);
-            buffer.AddRange(encryptTarget.Length.ToBytes());
-            foreach (char c in encryptTarget)
-                buffer.AddRange(c.ToBytes());
+            List<byte> buffer = new List<byte>(encryptTarget.Length + 8);
+            // buffer.AddRange(encryptTarget.Length.ToBytes());
+            if (Mode != StringCrypterMode.Auto)
+                buffer.Add((byte)Mode);
 
-            return buffer.ToArray();
+            if (Mode == StringCrypterMode.Auto)
+            {
+                bool useASCII = true;
+                fixed (char* ptr = encryptTarget)
+                    for (int i = 0; i < encryptTarget.Length; i++)
+                        if (ptr[i] > 255)
+                        {
+                            useASCII = false;
+                            break;
+                        }
+                if (useASCII)
+                {
+					buffer.Add((byte)StringCrypterMode.ASCII);
+					buffer.AddRange(Encoding.ASCII.GetBytes(encryptTarget));
+				}
+                else
+                {
+					buffer.Add((byte)StringCrypterMode.Utf8);
+					buffer.AddRange(Encoding.UTF8.GetBytes(encryptTarget));
+				}
+			}
+            else if (Mode == StringCrypterMode.ASCII)
+                buffer.AddRange(Encoding.ASCII.GetBytes(encryptTarget));
+            else if (Mode == StringCrypterMode.Utf8)
+				buffer.AddRange(Encoding.UTF8.GetBytes(encryptTarget));
+            else if (Mode == StringCrypterMode.Unicode)
+				buffer.AddRange(Encoding.Unicode.GetBytes(encryptTarget));
+			else if (Mode == StringCrypterMode.Utf32)
+				buffer.AddRange(Encoding.UTF32.GetBytes(encryptTarget));
+
+			buffer.InsertRange(0, (buffer.Count - 1).ToBytes());
+
+			return buffer.ToArray();
+        }
+
+        public enum StringCrypterMode : byte
+        {
+            Auto, ASCII, Utf8, Unicode, Utf32
         }
     }
 }

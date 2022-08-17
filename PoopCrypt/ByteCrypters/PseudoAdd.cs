@@ -9,7 +9,7 @@ namespace PoopCrypt.ByteCrypters
         public static byte[] adds = new byte[] { 1,3,7,10,23,76,130 };
         public static byte next = 0;
 
-        public IEnumerable<byte> CryptBytes(byte[] bytes)
+        public IEnumerable<byte> CryptBytes(byte[] bytes) // 197
         {
             List<byte> data = new List<byte>();
 
@@ -18,8 +18,9 @@ namespace PoopCrypt.ByteCrypters
                 byte b = _b;
                 while(b > 0)
                 {
-                    byte a = adds.Where(m => m <= b).Max();
-                    b -= a;
+                    //byte a = adds.Where(m => m <= b).Max();
+                    byte a = adds.MaxWhereLess(b);
+					b -= a;
                     data.Add(a);
                 }
                 data.Add(next);

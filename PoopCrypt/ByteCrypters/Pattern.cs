@@ -8,7 +8,7 @@ namespace PoopCrypt.ByteCrypters
     {
         public static Dictionary<byte, Func<bool, byte[], IEnumerable<byte>>> Patterns = new Dictionary<byte, Func<bool, byte[], IEnumerable<byte>>>();
 
-        public Random rand = new Random();
+        //public Random rand = new Random();
 
         static Pattern()
         {
@@ -22,7 +22,7 @@ namespace PoopCrypt.ByteCrypters
             if (Crypter.VERBOSE)
                 Console.Write("ByteCrypter.Pattern -> ");
 
-            byte patternType = Patterns.Keys.ToArray()[rand.Next(0, Patterns.Count)];
+            byte patternType = Patterns.Keys.ToArray().Rand();
             IEnumerable<byte> newBytes = Patterns[patternType](false, bytes);
             if (newBytes == null)
                 return CryptBytes(bytes);
@@ -35,7 +35,7 @@ namespace PoopCrypt.ByteCrypters
         public IEnumerable<byte> DecryptBytes(byte[] bytes) => Patterns[bytes[0]](true, bytes.Skip(1).ToArray());
     }
 
-    public unsafe static class BasicPatterns
+    public static class BasicPatterns
     {
         public static Random rand = new Random();
 
@@ -67,7 +67,7 @@ namespace PoopCrypt.ByteCrypters
             }
         }
 
-        public static IEnumerable<byte> FakeBytes(bool decrypt, byte[] bytes)
+        public static IEnumerable<byte> FakeBytes(bool decrypt, byte[] bytes) // 423 22
         {
             if (decrypt)
             {
@@ -76,14 +76,21 @@ namespace PoopCrypt.ByteCrypters
                 List<byte> ret = new List<byte>();
 
                 bool add = false;
-                byte prevKey = 0;
+                //byte prevKey = 0;
                 for (int i = keysCount + 1; i < bytes.Length; i++)
                 {
                     byte next = bytes[i];
-                    if (keys.Contains(next))
+                    bool contains = false;
+                    for(int x = 0; x < keys.Length; x++)
+                        if (keys[x] == next)
+                        {
+                            contains = true;
+                            break;
+                        }
+                    if (contains)
                     {
                         add = true;
-                        prevKey = next;
+                        //prevKey = next;
                     }
                     else if (add)
                     {
@@ -105,11 +112,21 @@ namespace PoopCrypt.ByteCrypters
                 List<byte> keys = new List<byte>();
                 List<byte> allowedBytes = new List<byte>();
                 for (byte i = 0; i <= 254; i++)
-                    if (!bytes.Contains(i))
-                    {
-                        keys.Add(i);
-                        allowedBytes.Add(i);
-                    }
+                {
+					bool contains = false;
+					for (int x = 0; x < bytes.Length; x++)
+                        if (bytes[x] == i)
+						{
+							contains = true;
+							break;
+						} 
+					//if (!bytes.Contains(i))
+					if (!contains)
+					{
+						keys.Add(i);
+						allowedBytes.Add(i);
+					}
+				}
 
                 if (keys.Count == 0)
                     return null;
@@ -117,7 +134,7 @@ namespace PoopCrypt.ByteCrypters
                 int keysCount = rand.Next(1, keys.Count > 8 ? 8 : keys.Count);
 
                 while (keys.Count > keysCount)
-                    keys.Remove(keys.Rand());
+					keys.RemoveAt(rand.Next(keys.Count));
 
                 foreach (byte b in keys)
                     allowedBytes.Remove(b);

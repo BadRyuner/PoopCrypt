@@ -6,10 +6,12 @@ using PoopCrypt;
 
 internal class Program
 {
-    static void Main(string[] args) // just example
+    static int Main(string[] args) // just example
     {
         var crypter = new Crypter();
         var timer = new System.Diagnostics.Stopwatch();
+
+        //args = new[] { "output.txt" };
 
         if (args.Length > 0)
         {   
@@ -20,8 +22,8 @@ internal class Program
             WriteLine("-----------------------------------------------");
             WriteLine(result);
             WriteLine($"-----------------------------------------------\nDone in {timer.ElapsedMilliseconds}ms!");
-            ReadLine();
-            return;
+            //ReadLine();
+            return 12;
         }
 
         var data = new MyData() { Date = System.DateTime.Now, SomeString = System.IO.File.ReadAllText("input.txt") };
@@ -42,7 +44,8 @@ internal class Program
         System.IO.File.WriteAllBytes($"output.txt", encrypted.ToArray()); // 1:44
         WriteLine($"Done in {timer.ElapsedMilliseconds}ms!");
 #endif
-        ReadLine();
+        return 11;
+        //ReadLine();
     }
 
     public struct MyData

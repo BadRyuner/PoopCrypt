@@ -1,17 +1,32 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
+using System.Runtime.CompilerServices;
 
 namespace PoopCrypt
 {
-    public unsafe static class Helpers
+    public static unsafe class Helpers
     {
         private static Random rand = new Random();
 
-        public static T Rand<T>(this List<T> l) => l[rand.Next(0, l.Count - 1)];
+		public static T Rand<T>(this List<T> l) => l[rand.Next(l.Count - 1)];
 
-        public static byte[] ToBytes(this long l)
+		public static T Rand<T>(this T[] l) => l[rand.Next(l.Length - 1)];
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static byte MaxWhereLess(this byte[] arr, byte m)
+        {
+            byte max = default;
+			for (int i = 0; i < arr.Length; i++)
+				if (arr[i] <= m)
+				{
+					if (arr[i] == m)
+						return m;
+					max = arr[i];
+				}
+			return max;
+        }
+
+		public static byte[] ToBytes(this long l)
         {
             byte* ptr = (byte*)&l;
             return new byte[] { ptr[0], ptr[1], ptr[2], ptr[3], ptr[4], ptr[5], ptr[6], ptr[7] };
