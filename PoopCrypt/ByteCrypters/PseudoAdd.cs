@@ -6,7 +6,7 @@ namespace PoopCrypt.ByteCrypters
 {
     public class PseudoAdd : IByteCrypter
     {
-        public static byte[] adds = new byte[] { 1,3,7,10,23,76,130 };
+        public static byte[] adds = new byte[] { 1,3,8,23,65,76,130,200 };
         public static byte next = 0;
 
         public IEnumerable<byte> CryptBytes(byte[] bytes) // 197

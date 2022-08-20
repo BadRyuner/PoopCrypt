@@ -10,7 +10,8 @@ namespace PoopCrypt.ByteCrypters
 		public IEnumerable<byte> CryptBytes(byte[] bytes)
 		{
 			byte[] toSum = new byte[bytes.Length];
-			Utils.Randomizer.SharedBasicRandom.NextBytes(toSum);
+			//Utils.Randomizer.SharedBasicRandom.NextBytes(toSum);
+			Utils.Randomizer.FillBytes(toSum);
 			List<byte> ret = new List<byte>();
 			ret.AddRange(toSum.Length.ToBytes());
 			ret.AddRange(toSum);

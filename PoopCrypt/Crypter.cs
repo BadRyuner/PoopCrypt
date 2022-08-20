@@ -51,12 +51,15 @@ namespace PoopCrypt
         public void RegisterDefaultByteCrypters()
         {
             ByteCrypters = new Dictionary<byte, IByteCrypter>();
-            ByteCrypters.Add(0, new ByteCrypters.FakeBytes());
-            ByteCrypters.Add(1, new ByteCrypters.StairXor());
-            ByteCrypters.Add(2, new ByteCrypters.PseudoAdd());
-            ByteCrypters.Add(3, new ByteCrypters.ScatteredBytes());
-            ByteCrypters.Add(4, new ByteCrypters.SimpleXor());
-            ByteCrypters.Add(5, new ByteCrypters.ArrayPlusArray());
+            ByteCrypters.Add(0, new ByteCrypters.Box());
+            ByteCrypters.Add(1, new ByteCrypters.Bit8());
+			ByteCrypters.Add(2, new ByteCrypters.StairXor());
+            ByteCrypters.Add(3, new ByteCrypters.PseudoAdd());
+            ByteCrypters.Add(4, new ByteCrypters.ScatteredBytes());
+            ByteCrypters.Add(5, new ByteCrypters.SimpleXor());
+            ByteCrypters.Add(6, new ByteCrypters.FakeBytes());
+            ByteCrypters.Add(7, new ByteCrypters.ArrayPlusArray());
+            ByteCrypters.Add(8, new ByteCrypters.HalfByte());
 		}
 
         public void GenerateAutoTypeCrypterFor<T>(bool ignoreAttribute = false) where T : new() => TypeCrypters.Add(typeof(T), new Recusrive<T>() { local = this, ignore = ignoreAttribute });
@@ -98,14 +101,15 @@ namespace PoopCrypt
             while (parsedBytes != bytes.Count)
             {
                 var _take = bytes.Count - parsedBytes;
-                var take = Utils.Randomizer.SharedBasicRandom.Next(1, _take > 150 ? 150 : _take);
+				//var take = Utils.Randomizer.SharedBasicRandom.Next(1, _take > 150 ? 150 : _take);
+				var take = Utils.Randomizer.Next(1, _take > 150 ? (byte)150 : (byte)_take);
 
-                byte[] arr = new byte[take];
+				byte[] arr = new byte[take];
                 Array.Copy(bytesAsArr, parsedBytes, arr, 0, take);
                 tryagain: var randomCrypter = GetRandomCrypter();
                 var newBytes = randomCrypter.crypter.CryptBytes(arr);
                 if (newBytes == null)
-	                throw new Exception();//goto tryagain;
+	                goto tryagain;
                 encryptedBytes.Add(randomCrypter.b);
                 encryptedBytes.AddRange(((char)(short)newBytes.Count()).ToBytes());
                 encryptedBytes.AddRange(newBytes);
@@ -177,10 +181,10 @@ namespace PoopCrypt
 
         private (byte b, IByteCrypter crypter) GetRandomCrypter()
         {
-			//var values = ByteCrypters.Keys.ToArray();
 			var values = cachedTypeCryptersKeys;
 			var selected = Utils.Randomizer.SharedBasicRandom.Next(0, values.Length - 1);
-            return (values[selected], ByteCrypters[values[selected]]);
+			//var selected = Utils.Randomizer.Next((byte)(values.Length - 1));
+			return (values[selected], ByteCrypters[values[selected]]);
         }
     }
 }

@@ -3,6 +3,15 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Title>PoopCrypt</Title>
+    <Authors>BadRyuner</Authors>
+    <Company />
+    <Description>Very bad byte[] encoder and decoder</Description>
+    <PackageProjectUrl>https://github.com/BadRyuner/PoopCrypt</PackageProjectUrl>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/BadRyuner/PoopCrypt</RepositoryUrl>
+    <PackageTags>Crypter;Decryption;Encryption</PackageTags>
   </PropertyGroup>
 
 </Project>
