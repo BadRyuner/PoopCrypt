@@ -6,11 +6,9 @@ namespace PoopCrypt
 {
     public static unsafe class Helpers
     {
-        private static Random rand = new Random();
+		public static T Rand<T>(this List<T> l) => l[Utils.Randomizer.SharedBasicRandom.Next(l.Count - 1)];
 
-		public static T Rand<T>(this List<T> l) => l[rand.Next(l.Count - 1)];
-
-		public static T Rand<T>(this T[] l) => l[rand.Next(l.Length - 1)];
+		public static T Rand<T>(this T[] l) => l[Utils.Randomizer.SharedBasicRandom.Next(l.Length - 1)];
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static byte MaxWhereLess(this byte[] arr, byte m)

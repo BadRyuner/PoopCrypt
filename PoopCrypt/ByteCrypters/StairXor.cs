@@ -6,15 +6,11 @@ namespace PoopCrypt.ByteCrypters
 {
     public class StairXor : IByteCrypter
     {
-        public Random rand = new Random();
         public byte[] randByte = new byte[] { 54 };
 
         public IEnumerable<byte> CryptBytes(byte[] bytes)
         {
-            if (Crypter.VERBOSE)
-                Console.WriteLine("ByteCrypter.StairXor");
-
-            rand.NextBytes(randByte);
+            Utils.Randomizer.SharedBasicRandom.NextBytes(randByte);
             byte xor = randByte[0];
 
             List<byte> newBytes = new List<byte>(bytes.Length + 1);

@@ -7,8 +7,6 @@ namespace PoopCrypt.ByteCrypters
 {
     internal class ScatteredBytes : IByteCrypter
     {
-        Random rand = new Random();
-
         /*public IEnumerable<byte> CryptBytes(byte[] bytes)
         {
             if (Crypter.VERBOSE)
@@ -44,9 +42,6 @@ namespace PoopCrypt.ByteCrypters
 
 		public unsafe IEnumerable<byte> CryptBytes(byte[] bytes)
 		{
-			if (Crypter.VERBOSE)
-				Console.WriteLine("ByteCrypter.ScatteredBytes");
-
             byte[] newBytes = new byte[bytes.Length * 3];
 
             fixed (byte* bPtr = &bytes[0]) 
@@ -58,7 +53,7 @@ namespace PoopCrypt.ByteCrypters
                 short pos = 0;
                 while (notUsedKeys.Count > 0)
                 {
-                    var takeAt = rand.Next(notUsedKeys.Count);
+                    var takeAt = Utils.Randomizer.SharedBasicRandom.Next(notUsedKeys.Count);
                     var key = notUsedKeys[takeAt]; notUsedKeys.RemoveAt(takeAt);
 
                     newBytes[pos] = ((byte*)&key)[0];
